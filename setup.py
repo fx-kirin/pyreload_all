@@ -16,7 +16,7 @@ except ImportError:
     from distutils.core import setup, Extension
 setup(
     name='reload_all',
-    version='0.04',
+    version='0.05',
     description='Reload all modified modules for 2.7 and 3.x',
     long_description='',
     author='fx-kirin',
