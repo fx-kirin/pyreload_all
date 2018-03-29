@@ -24,6 +24,7 @@ class Test(unittest.TestCase):
         with open("foo_python_module.py", "w") as f:
             f.write("print(\"first import\")")
         import foo_python_module
+        time.sleep(1)
         reload_all.reload_all()
         time.sleep(1)
         with open("foo_python_module.py", "w") as f:
