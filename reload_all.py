@@ -59,7 +59,11 @@ def reload_all(locals_=None):
                         
 
 def reload_class_if_exist(v, variables):
-    for key, value in variables.iteritems():
+    try:
+        iteritems = variables.iteritems()
+    except:
+        iteritems = variables.items()
+    for key, value in iteritems:
         if hasattr(value, '__class__'):
             if hasattr(value, '__dict__'):
                 reload_class_if_exist(v, value.__dict__)
