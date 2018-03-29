@@ -5,10 +5,12 @@
 # Copyright © 2018 zenbook <zenbook@zenbook-XPS>
 #
 
+import os,sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import unittest
 import reload_all
-import os
 import time
+from shutil import copyfile
 
 class Test(unittest.TestCase):
     def setUp(self):
@@ -21,15 +23,16 @@ class Test(unittest.TestCase):
 
     def testName(self):
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        with open("foo_python_module.py", "w") as f:
-            f.write("print(\"first import\")")
+        copyfile("foo_python_module_1.py", "foo_python_module.py")
         import foo_python_module
+        foo_python_module.mymethod()
+        myclass = foo_python_module.MyClass()
+        myclass.my_instance_method()
         time.sleep(1)
-        reload_all.reload_all()
-        time.sleep(1)
-        with open("foo_python_module.py", "w") as f:
-            f.write("print(\"reloaded\")")
-        reload_all.reload_all()
+        copyfile("foo_python_module_2.py", "foo_python_module.py")
+        reload_all.reload_all(locals())
+        foo_python_module.mymethod()
+        myclass.my_instance_method()
 
 if __name__ == '__main__':
     #import sys;sys.argv = ['', 'Test.testName']
