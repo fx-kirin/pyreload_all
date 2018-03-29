@@ -23,7 +23,7 @@ if sys.version_info[0] == 3:
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 SYS_PREFIX = os.path.dirname(os.path.dirname(sys.executable))+'/lib'
 
-def reload_all(locals_=None):
+def reload_all(locals_=None, max_depth=5):
     for k, v in sys.modules.items():
         if not hasattr(v, '__file__'):
             continue
@@ -40,14 +40,14 @@ def reload_all(locals_=None):
                     if os.path.getmtime(py_file_path) > os.path.getmtime(v.__file__):
                         print("reload %s"%(v.__file__))
                         reload(v)
-                        reload_class_if_exist(v, locals_)
+                        reload_class_if_exist(v, locals_, max_depth)
             elif re.match(".+\.py$", v.__file__):
                 pyc_file_path = v.__file__ + "c"
                 if os.path.exists(pyc_file_path):
                     if os.path.getmtime(v.__file__) > os.path.getmtime(pyc_file_path):
                         print("reload %s"%(v.__file__))
                         reload(v)
-                        reload_class_if_exist(v, locals_)
+                        reload_class_if_exist(v, locals_, max_depth)
         elif sys.version_info[0] == 3:
             if re.match(".+\.py$", v.__file__):
                 pyc_file_path = cache_from_source(v.__file__)
@@ -55,10 +55,10 @@ def reload_all(locals_=None):
                     if os.path.getmtime(v.__file__) > os.path.getmtime(pyc_file_path):
                         print("reload %s"%(v.__file__))
                         reload(v)
-                        reload_class_if_exist(v, locals_)
+                        reload_class_if_exist(v, locals_, max_depth)
                         
 
-def reload_class_if_exist(v, variables):
+def reload_class_if_exist(v, variables, max_depth, current_depth=0):
     try:
         iteritems = variables.iteritems()
     except:
@@ -66,7 +66,9 @@ def reload_class_if_exist(v, variables):
     for key, value in iteritems:
         if hasattr(value, '__class__'):
             if hasattr(value, '__dict__'):
-                reload_class_if_exist(v, value.__dict__)
+                current_depth += 1
+                if current_depth <= max_depth:
+                    reload_class_if_exist(v, value.__dict__, max_depth, current_depth)
             if hasattr(value, '__module__'):
                 if value.__class__.__module__ == v.__name__:
                     if hash(value.__class__) != hash(getattr(v, value.__class__.__name__)):
